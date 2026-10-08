@@ -1,0 +1,9 @@
+/native/Makefile
+/native/.qmake.stash
+/native/moc_predefs.h
+/native/*.moc
+/native/*.o
+*.so
+/package/contents/code/codexbar
+/*.png
+/*.log

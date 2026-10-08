@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="refreshIntervalSec" type="Int"><default>300</default></entry>
+    <entry name="showLabel" type="Bool"><default>true</default></entry>
+    <entry name="showRemaining" type="Bool"><default>true</default></entry>
+    <entry name="colorMode" type="String"><default>full</default></entry>
+    <entry name="barWindow" type="String"><default>Session</default></entry>
+  </group>
+</kcfg>

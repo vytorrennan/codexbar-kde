@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cat "$(dirname -- "${BASH_SOURCE[0]}")/report.json"

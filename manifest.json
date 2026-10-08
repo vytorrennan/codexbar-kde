@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "mryll.codexbar",
+  "name": "Codexbar",
+  "version": "0.8.1",
+  "author": "mryll",
+  "license": "MIT",
+  "description": "OpenAI Codex subscription usage (codexbar) in the Omarchy bar: session, weekly, code-review and per-model limits with pacing.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "omarchy/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Codex Usage",
+    "description": "Click: usage panel. Middle click: force refresh. Right click: open the Codex usage page.",
+    "category": "AI",
+    "allowMultiple": false,
+    "defaultSection": "right",
+      "defaults": {
+        "refreshIntervalSec": 300,
+        "showLabel": true,
+        "showRemaining": false,
+        "colorMode": "full",
+        "barWindow": "Session"
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Refresh interval (seconds)",
+        "description": "How often to re-run the CLI. The API response is cached for 60s, so anything below that re-reads the same cached answer. Opening the panel and middle-clicking the bar both force a fresh fetch regardless.",
+        "min": 60,
+        "max": 3600,
+        "step": 30,
+        "defaultValue": 300
+      },
+      {
+        "key": "showLabel",
+        "type": "boolean",
+        "label": "Show usage % next to the icon",
+        "description": "Horizontal bars only. A vertical bar always shows just the icon; the panel is one click away either way.",
+        "defaultValue": true
+      },
+      {
+        "key": "showRemaining",
+        "type": "boolean",
+        "label": "Show remaining percentage",
+        "description": "Shows the percentage left on the bar while the panel continues to show usage.",
+        "defaultValue": false
+      },
+      {
+        "key": "colorMode",
+        "type": "enum",
+        "label": "Colors",
+        "description": "Monochrome rendering uses foreground tones only — severity stays readable through the numbers and glyphs. none: no color anywhere. bar-only: colored bar face, plain panel. panel-only: the reverse.",
+        "options": [
+          "full",
+          "none",
+          "bar-only",
+          "panel-only"
+        ],
+        "defaultValue": "full"
+      },
+      {
+        "key": "barWindow",
+        "type": "enum",
+        "label": "Window shown on the bar",
+        "description": "Which usage window drives the percentage shown on the bar. Worst picks the fullest one. Any other window that runs out still reaches you through the alarm dot and the panel.",
+        "options": [
+          "Session",
+          "Weekly",
+          "Review",
+          "Worst"
+        ],
+        "defaultValue": "Session"
+      }
+    ]
+  }
+}

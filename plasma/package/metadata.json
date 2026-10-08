@@ -1,0 +1,18 @@
+{
+  "KPlugin": {
+    "Id": "org.local.codexbar",
+    "Name": "CodexBar",
+    "Description": "Codex subscription usage, limits, reset countdowns and pacing",
+    "Icon": "utilities-system-monitor",
+    "Authors": [
+      {
+        "Name": "mryll (original); local Plasma adaptation"
+      }
+    ],
+    "License": "MIT",
+    "Version": "0.8.1",
+    "Category": "System Information"
+  },
+  "KPackageStructure": "Plasma/Applet",
+  "X-Plasma-API-Minimum-Version": "6.0"
+}
