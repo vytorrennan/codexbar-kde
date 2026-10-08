@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls as Controls
-import "../Commons"
+import "../Commons" as Compat
 Controls.Button {
-    property real fontSize: Style.font.bodySmall
-    property color foreground: Color.foreground
-    property string fontFamily: Style.font.family
+    property real fontSize: Compat.Style.font.bodySmall
+    property color foreground: Compat.Color.foreground
+    property string fontFamily: Compat.Style.font.family
     property bool bordered: false
     property bool hasCursor: false
     font.family: fontFamily

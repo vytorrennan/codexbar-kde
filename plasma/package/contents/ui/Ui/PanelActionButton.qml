@@ -1,16 +1,16 @@
 import QtQuick
 import QtQuick.Controls as Controls
-import "../Commons"
+import "../Commons" as Compat
 Rectangle {
     id: root
     property real size: 24
     property var borderSpec: ({color: "transparent", width: 0})
     property string iconText: ""
     property string tooltipText: ""
-    property color foreground: Color.foreground
+    property color foreground: Compat.Color.foreground
     property color hoverColor: foreground
-    property string fontFamily: Style.font.family
-    property real fontSize: Style.font.bodySmall
+    property string fontFamily: Compat.Style.font.family
+    property real fontSize: Compat.Style.font.bodySmall
     readonly property bool _hot: hover.hovered
     signal clicked()
     color: "transparent"

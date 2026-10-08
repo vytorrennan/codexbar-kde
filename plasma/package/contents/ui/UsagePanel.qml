@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import org.kde.kirigami as Kirigami
 import "Io"
-import "Commons"
+import "Commons" as Compat
 import "Ui"
 
 // Detail panel for the codexbar Omarchy shell plugin. Owns the data: polls
@@ -41,8 +41,8 @@ Item {
   // reference for a card, and a theme that defines popups.text separately would
   // be ignored outright. (printbar already did this; the rest of the family now
   // agrees.)
-  readonly property color foreground: Color.popups.text
-  readonly property color urgent: bar ? bar.urgent : Color.urgent
+  readonly property color foreground: Compat.Color.popups.text
+  readonly property color urgent: bar ? bar.urgent : Compat.Color.urgent
   readonly property color dim: alpha(foreground, 0.65)
 
   // ---- Freshness suffix tint, shared by the whole family. The timestamp is
@@ -50,9 +50,9 @@ Item {
   // "· stale (…)" suffix carries a muted warning tone, never full urgent. Text
   // stays the primary carrier, so a monochrome panel loses nothing.
   readonly property color freshnessWarn: !panelColored ? dim : mix(dim, urgent, 0.4)
-  readonly property color track: Style.selectedFillFor(foreground, Color.accent, urgent)
-  readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
-  readonly property color barFaceForeground: bar ? bar.barForeground : Color.foreground
+  readonly property color track: Compat.Style.selectedFillFor(foreground, Compat.Color.accent, urgent)
+  readonly property string fontFamily: bar ? bar.fontFamily : Compat.Style.font.family
+  readonly property color barFaceForeground: bar ? bar.barForeground : Compat.Color.foreground
   readonly property color barFaceDim: alpha(barFaceForeground, 0.65)
 
   property string binName: "codexbar"
@@ -159,10 +159,10 @@ Item {
   // `bar.background` on a transparent bar would floor the contrast against a
   // surface nobody can see.
   readonly property color barBackdrop: {
-    var fg = bar ? bar.barForeground : Color.foreground
+    var fg = bar ? bar.barForeground : Compat.Color.foreground
     if (bar && bar.transparent)
       return relLuminance(fg) > 0.5 ? Qt.rgba(0, 0, 0, 1) : Qt.rgba(1, 1, 1, 1)
-    return bar ? bar.background : Color.background
+    return bar ? bar.background : Compat.Color.background
   }
 
   function legibleOnBar(c) { return contrastFloor(c, barBackdrop, barFaceForeground, 4.5) }
@@ -177,7 +177,7 @@ Item {
   //
   // Fallback (payload not in yet, or an older codexbar without `palette`):
   // derive the anchors from the theme instead of hardcoding hex — fixed
-  // gauge hues, saturation off Color.urgent, lightness off Color.foreground,
+  // gauge hues, saturation off Compat.Color.urgent, lightness off Compat.Color.foreground,
   // both clamped so the ramp stays legible on any theme.
   function gaugeColor(hue) {
     var saturation = clamp(urgent.hslSaturation, 0.45, 0.85)
@@ -185,14 +185,14 @@ Item {
     return Qt.hsla(hue, saturation, lightness, 1)
   }
 
-  // Style.colorFromHex validates the string and returns the fallback when the
+  // Compat.Style.colorFromHex validates the string and returns the fallback when the
   // payload carries something that isn't a #hex color (e.g. a named CSS color
   // passed through --color-*, which the bash side renders but can't lerp).
   function paletteColor(key, fallback) {
     var p = report ? report.palette : null
     var value = p ? p[key] : null
     if (typeof value !== "string" || value === "") return fallback
-    return Style.colorFromHex(value, fallback)
+    return Compat.Style.colorFromHex(value, fallback)
   }
 
   // Which colors come from where:
@@ -245,7 +245,7 @@ Item {
       // than the payload's hex — see the gaugeCritical note above.
       var c = (hex.toLowerCase() === paletteCriticalHex && paletteCriticalHex !== "")
         ? gaugeCritical
-        : Style.colorFromHex(hex, foreground)
+        : Compat.Style.colorFromHex(hex, foreground)
       out.push({ "pct": clamp(pct, 0, 100), "color": c })
     }
     return out
@@ -796,7 +796,7 @@ Item {
 
       onMoveRequested: function(dx, dy) {
         if (dy !== 0)
-          panelFlick.contentY = root.clamp(panelFlick.contentY + dy * Style.space(56), 0,
+          panelFlick.contentY = root.clamp(panelFlick.contentY + dy * Compat.Style.space(56), 0,
                                            Math.max(0, panelFlick.contentHeight - panelFlick.height))
       }
       onActivateRequested: root.refresh(true)
@@ -819,7 +819,7 @@ Item {
         Column {
           id: column
           width: panelFlick.width
-          spacing: Style.space(8)
+          spacing: Compat.Style.space(8)
 
           // ---------- Hero: glyph · Codex · plan ----------
           PanelHero {
@@ -852,12 +852,12 @@ Item {
           Text {
             visible: root.usageWindows.length === 0 && root.errorMessage === ""
             width: parent.width
-            topPadding: Style.space(16)
+            topPadding: Compat.Style.space(16)
             textFormat: Text.PlainText
             text: "No usage data yet.\nLog in with the codex CLI and refresh."
             color: root.dim
             font.family: root.fontFamily
-            font.pixelSize: Style.font.body
+            font.pixelSize: Compat.Style.font.body
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
           }
@@ -865,23 +865,23 @@ Item {
           BorderSurface {
             visible: root.errorMessage !== ""
             width: parent.width
-            implicitHeight: errorText.implicitHeight + Style.spacing.xl * 2
+            implicitHeight: errorText.implicitHeight + Compat.Style.spacing.xl * 2
             color: root.alpha(root.panelColored ? root.urgent : root.foreground, 0.10)
-            borderSpec: Border.flat(root.alpha(root.panelColored ? root.urgent : root.foreground, 0.35), 1)
-            radius: Style.cornerRadius
+            borderSpec: Compat.Border.flat(root.alpha(root.panelColored ? root.urgent : root.foreground, 0.35), 1)
+            radius: Compat.Style.cornerRadius
 
             Text {
               id: errorText
               anchors.left: parent.left
               anchors.right: copyInstallButton.visible ? copyInstallButton.left : parent.right
               anchors.verticalCenter: parent.verticalCenter
-              anchors.leftMargin: Style.space(12)
-              anchors.rightMargin: Style.space(12)
+              anchors.leftMargin: Compat.Style.space(12)
+              anchors.rightMargin: Compat.Style.space(12)
               textFormat: Text.PlainText
               text: root.errorMessage
               color: root.dim
               font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
+              font.pixelSize: Compat.Style.font.caption
               wrapMode: Text.WordWrap
             }
 
@@ -891,7 +891,7 @@ Item {
               id: copyInstallButton
               visible: root.notInstalled
               anchors.right: parent.right
-              anchors.rightMargin: Style.space(8)
+              anchors.rightMargin: Compat.Style.space(8)
               anchors.verticalCenter: parent.verticalCenter
               // nf-md-content_copy / nf-md-check, written literally (a "\u"
               // escape takes exactly four hex digits; these are five).
@@ -900,8 +900,8 @@ Item {
               foreground: root.dim
               hoverColor: root.foreground
               fontFamily: root.fontFamily
-              fontSize: Style.font.caption
-              size: Style.space(20)
+              fontSize: Compat.Style.font.caption
+              size: Compat.Style.space(20)
               onClicked: {
                 Native.copyText(root.installCmd)
                 root.installCopied = true
@@ -915,7 +915,7 @@ Item {
             id: usageSection
             visible: root.usageWindows.length > 0
             width: parent.width
-            spacing: Style.space(8)
+            spacing: Compat.Style.space(8)
 
             Repeater {
               model: root.usageWindows
@@ -938,7 +938,7 @@ Item {
             id: creditsSection
             visible: root.hasCredits
             width: parent.width
-            spacing: Style.space(6)
+            spacing: Compat.Style.space(6)
 
             PanelSectionHeader {
               width: parent.width
@@ -960,7 +960,7 @@ Item {
                 textFormat: Text.PlainText
                 color: root.dim
                 font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
+                font.pixelSize: Compat.Style.font.caption
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
               }
@@ -971,7 +971,7 @@ Item {
                 text: root.creditsBalanceText(root.credits)
                 color: root.foreground
                 font.family: root.fontFamily
-                font.pixelSize: Style.font.body
+                font.pixelSize: Compat.Style.font.body
                 font.bold: true
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -985,7 +985,7 @@ Item {
               text: root.creditsDetailText(root.credits)
               color: root.dim
               font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
+              font.pixelSize: Compat.Style.font.caption
             }
           }
 
@@ -1012,7 +1012,7 @@ Item {
               ? (root.panelColored ? root.urgent : root.foreground)
               : (root.panelColored ? root.mix(root.dim, root.urgent, 0.5) : root.dim)
             font.family: root.fontFamily
-            font.pixelSize: Style.font.caption
+            font.pixelSize: Compat.Style.font.caption
             wrapMode: Text.WordWrap
           }
 
@@ -1031,7 +1031,7 @@ Item {
               id: footerLabel
               anchors.left: parent.left
               anchors.right: refreshButton.left
-              anchors.rightMargin: Style.spacing.sm
+              anchors.rightMargin: Compat.Style.spacing.sm
               anchors.verticalCenter: parent.verticalCenter
               anchors.verticalCenterOffset: 2
               spacing: 0
@@ -1050,7 +1050,7 @@ Item {
                 textFormat: Text.PlainText
                 color: root.freshnessWarn
                 font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
+                font.pixelSize: Compat.Style.font.caption
               }
             }
 
@@ -1066,8 +1066,8 @@ Item {
               foreground: root.dim
               hoverColor: root.foreground
               fontFamily: root.fontFamily
-              fontSize: Style.font.caption
-              size: Style.space(20)
+              fontSize: Compat.Style.font.caption
+              size: Compat.Style.space(20)
               enabled: !root.fetchBusy
               onClicked: root.refresh(true)
             }
@@ -1113,7 +1113,7 @@ Item {
       return root.panelUsageColor(Math.min(anchorPct, shownPct))
     }
 
-    spacing: Style.space(6)
+    spacing: Compat.Style.space(6)
 
     Item {
       width: parent.width
@@ -1125,11 +1125,11 @@ Item {
         text: root.windowTitle(windowRow.win)
         color: root.foreground
         font.family: root.fontFamily
-        font.pixelSize: Style.font.body
+        font.pixelSize: Compat.Style.font.body
         elide: Text.ElideRight
         anchors.left: parent.left
         anchors.right: windowValue.left
-        anchors.rightMargin: Style.spacing.sm
+        anchors.rightMargin: Compat.Style.spacing.sm
         anchors.verticalCenter: parent.verticalCenter
       }
 
@@ -1145,7 +1145,7 @@ Item {
         text: windowRow.win ? Math.round(meterFill.shownPct) + "%" : "—"
         color: windowRow.valueColor
         font.family: root.fontFamily
-        font.pixelSize: Style.font.body
+        font.pixelSize: Compat.Style.font.body
         font.bold: true
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
@@ -1159,14 +1159,14 @@ Item {
       id: meter
       width: parent.width
       // Tall enough for the elapsed marker's lane above the track (see below).
-      implicitHeight: Style.space(14)
+      implicitHeight: Compat.Style.space(14)
 
       Rectangle {
         id: meterTrack
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: Math.max(Style.space(4), Math.round(Style.spacing.controlHeight * 0.14))
+        height: Math.max(Compat.Style.space(4), Math.round(Compat.Style.spacing.controlHeight * 0.14))
         radius: height / 2
         color: root.track
       }
@@ -1229,8 +1229,8 @@ Item {
       Rectangle {
         id: elapsedMarker
         visible: windowRow.hasElapsed
-        width: Math.max(2, Style.spaceReal(2))
-        height: Math.max(3, Style.spaceReal(4))
+        width: Math.max(2, Compat.Style.spaceReal(2))
+        height: Math.max(3, Compat.Style.spaceReal(4))
         // Rides ABOVE the track, never across it. The marker sits at the
         // ELAPSED position, which lands on the fill when usage runs ahead of
         // pace and on the empty track when it runs behind — no single tone
@@ -1239,7 +1239,7 @@ Item {
         // meets the panel background, so its contrast is constant, and it can
         // never be mistaken for the fill's tip.
         anchors.bottom: meterTrack.top
-        anchors.bottomMargin: Math.max(1, Style.spaceReal(1))
+        anchors.bottomMargin: Math.max(1, Compat.Style.spaceReal(1))
         // Travels with the fill and the figure: all three are scaled by the
         // same openProgress, so the sweep moves them as one.
         x: root.clamp(meterTrack.width * windowRow.elapsed * root.openProgress - width / 2,
@@ -1263,10 +1263,10 @@ Item {
         text: root.resetText(windowRow.win)
         color: root.dim
         font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
+        font.pixelSize: Compat.Style.font.caption
         anchors.left: parent.left
         anchors.right: paceLabel.left
-        anchors.rightMargin: Style.spacing.sm
+        anchors.rightMargin: Compat.Style.spacing.sm
         elide: Text.ElideRight
         anchors.verticalCenter: parent.verticalCenter
       }
@@ -1277,7 +1277,7 @@ Item {
         text: root.paceText(windowRow.win)
         color: root.paceColor(windowRow.win && windowRow.win.pace ? String(windowRow.win.pace.state) : "")
         font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
+        font.pixelSize: Compat.Style.font.caption
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
       }

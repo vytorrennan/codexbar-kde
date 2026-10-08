@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls as Controls
-import "../Commons"
+import "../Commons" as Compat
 Controls.TextField {
-    property color foreground: Color.foreground
+    property color foreground: Compat.Color.foreground
     color: foreground
-    font.family: Style.font.family
-    font.pixelSize: Style.font.bodySmall
+    font.family: Compat.Style.font.family
+    font.pixelSize: Compat.Style.font.bodySmall
     selectByMouse: true
 }

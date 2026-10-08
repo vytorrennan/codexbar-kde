@@ -4,8 +4,7 @@ import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.kirigami as Kirigami
 import "Io"
-import "Commons"
-
+import "Commons" as Compat
 PlasmoidItem {
     id: applet
     readonly property bool inPanel: Plasmoid.formFactor === PlasmaCore.Types.Horizontal || Plasmoid.formFactor === PlasmaCore.Types.Vertical
@@ -46,9 +45,9 @@ PlasmoidItem {
             barWindow: Plasmoid.configuration.barWindow
         })
         bar: ({vertical: applet.Plasmoid.formFactor === PlasmaCore.Types.Vertical,
-               foreground: Color.foreground, barForeground: Color.foreground,
-               background: Color.background, urgent: Color.urgent,
-               fontFamily: Style.font.family, transparent: false})
+               foreground: Compat.Color.foreground, barForeground: Compat.Color.foreground,
+               background: Compat.Color.background, urgent: Compat.Color.urgent,
+               fontFamily: Compat.Style.font.family, transparent: false})
         onCloseRequested: applet.expanded = false
     }
 

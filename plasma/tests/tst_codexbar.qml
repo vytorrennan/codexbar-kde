@@ -2,8 +2,7 @@ import QtQuick
 import QtTest
 import "../package/contents/ui"
 import "../package/contents/ui/Io"
-import "../package/contents/ui/Commons"
-
+import "../package/contents/ui/Commons" as Compat
 TestCase {
     name: "CodexBarPlasma"
     when: windowShown
@@ -14,7 +13,7 @@ TestCase {
         id: fixture
         width: 388
         height: 580
-        Rectangle { anchors.fill: parent; color: Color.background }
+        Rectangle { anchors.fill: parent; color: Compat.Color.background }
         UsagePanel { id: panel; anchors.fill: parent; pollingEnabled: false; opened: true }
     }
     FileView { id: sample; path: Native.localFile(Qt.resolvedUrl("report.json")) }
@@ -24,6 +23,12 @@ TestCase {
         panel.settings = ({showRemaining: false})
         panel.exitCode = 0
         panel.handle(sample.text())
+    }
+    function test_themeHelpers() {
+        verify(Compat.Color.popups !== undefined)
+        verify(Compat.Color.popups.background.a > 0)
+        verify(Compat.Color.popups.text.a > 0)
+        compare(panel.foreground, Compat.Color.popups.text)
     }
     function test_displayAndSettings() {
         compare(panel.usageWindows.length, 3)

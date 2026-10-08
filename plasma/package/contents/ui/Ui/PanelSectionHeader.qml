@@ -1,12 +1,12 @@
 import QtQuick
-import "../Commons"
+import "../Commons" as Compat
 Text {
-    property color foreground: Color.foreground
-    property string fontFamily: Style.font.family
+    property color foreground: Compat.Color.foreground
+    property string fontFamily: Compat.Style.font.family
     textFormat: Text.PlainText
     color: foreground
     opacity: 0.65
     font.family: fontFamily
-    font.pixelSize: Style.font.caption
+    font.pixelSize: Compat.Style.font.caption
     font.letterSpacing: 1
 }
