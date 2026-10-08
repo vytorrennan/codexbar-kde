@@ -14,7 +14,15 @@ PlasmoidItem {
     toolTipMainText: "CodexBar"
     toolTipSubText: usage.barTooltip || (usage.errorMessage || "Codex subscription usage — click for details")
 
-    // Polling lives outside the lazy popup, so the panel percentage stays current.
+    // All applets share one source, outside the lazy popup.
+    Component.onCompleted: UsageSource.registerClient(applet, Plasmoid.configuration.refreshIntervalSec)
+    Component.onDestruction: UsageSource.unregisterClient(applet)
+    Connections {
+        target: Plasmoid.configuration
+        function onRefreshIntervalSecChanged() {
+            UsageSource.registerClient(applet, Plasmoid.configuration.refreshIntervalSec)
+        }
+    }
     UsagePanel {
         id: usage
         objectName: "codexbarUsage"
@@ -22,6 +30,13 @@ PlasmoidItem {
         anchors.fill: parent
         visible: applet.fullRepresentationItem !== null && (applet.expanded || !applet.inPanel)
         opened: applet.expanded || !applet.inPanel
+        pollingEnabled: false
+        usageSource: UsageSource
+        report: UsageSource.report
+        errorMessage: UsageSource.errorMessage
+        pluginStale: UsageSource.pluginStale
+        loading: UsageSource.loading
+        notInstalled: UsageSource.notInstalled
         bundledCmd: Native.localFile(Qt.resolvedUrl("../code/codexbar"))
         settings: ({
             refreshIntervalSec: Plasmoid.configuration.refreshIntervalSec,

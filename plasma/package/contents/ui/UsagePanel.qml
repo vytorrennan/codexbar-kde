@@ -17,6 +17,8 @@ Item {
   property var settings: ({})
   property bool opened: false
   property bool pollingEnabled: true
+  property var usageSource: null
+  property bool coalesceRefreshes: false
   signal closeRequested()
   function setting(key, fallback) { return settings[key] === undefined ? fallback : settings[key] }
   function close() { closeRequested() }
@@ -525,7 +527,7 @@ Item {
   // — otherwise it re-enables in the gap between the two signals and a click
   // there queues a second run through pendingCmd, which is the one thing its
   // disabled state promises cannot happen.
-  readonly property bool fetchBusy: !collectorDone || !processDone
+  readonly property bool fetchBusy: usageSource ? usageSource.fetchBusy : (!collectorDone || !processDone)
   property string capturedText: ""
   property int exitCode: 0
   property var pendingCmd: null
@@ -560,6 +562,8 @@ Item {
   }
 
   function refresh(force) {
+    if (usageSource) { usageSource.refresh(force); return }
+    if (coalesceRefreshes && fetchBusy) return
     startRun(buildCmd(force === true))
   }
 

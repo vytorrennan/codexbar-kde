@@ -40,7 +40,9 @@ plasmawindowed org.local.codexbar
 
 The default refresh interval is **300 seconds (five minutes)**. Configure CodexBar to choose the interval, session/weekly/review/worst window, colors, label visibility, or whether the panel shows remaining or used percentage. The popup always shows usage consumed.
 
-The widget polls even when the popup is closed. It prefers `codexbar` from PATH, falling back to the bundled CLI only if that executable cannot start. The original CLI's 60-second API cache and token-refresh behavior are preserved. Authentication stays in the CLI; credentials are not passed into QML.
+All CodexBar widgets in the same Plasma session share one polling timer and report, even across monitors. The shortest configured refresh interval controls the shared timer; colors and display settings remain independent. Adding another widget does not start another refresh cycle. Manual requests made while a refresh is in progress join that refresh.
+
+The widget polls even when the popup is closed. It prefers `codexbar` from PATH, falling back to the bundled CLI only if that executable cannot start. The original CLI's 60-second API cache and token-refresh behavior are preserved. Authentication stays in the CLI; credentials are not passed into QML. A separate `plasmawindowed` process has its own polling source, with the CLI cache shared between processes.
 
 To update, close widget instances, pull the latest changes, and run `make install-plasma` again. Plasma may retain old QML until the widget or Plasma shell is restarted. The native helper must be rebuilt after incompatible Qt updates.
 

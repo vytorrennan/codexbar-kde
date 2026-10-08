@@ -28,6 +28,9 @@ plasmawindowed org.local.codexbar
 
 The widget polls in the background even before its popup is opened. The default
 interval is five minutes; the original CLI's 60-second API cache still applies.
+Multiple widgets in the same Plasma session share one polling timer and report.
+The shortest configured interval wins, while each widget keeps its own display
+settings. Requests during an in-flight refresh are coalesced.
 Right-click the widget and choose **Configure CodexBar** to change the interval,
 usage window, colors, label visibility, or remaining-allowance display.
 
