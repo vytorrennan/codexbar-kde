@@ -4,6 +4,8 @@ A KDE Plasma port of [mryll/codexbar](https://github.com/mryll/codexbar), built 
 
 The panel shows the **percentage remaining** by default. The popup shows **percentage used**, reset countdowns, pacing, credits when available, and the last update time. The compact popup has a minimum height based on its content, so it can shrink without introducing a scrollbar.
 
+<img src="docs/screenshot.png" alt="CodexBar KDE popup showing session and weekly usage" width="333">
+
 ## Install
 
 Requires Plasma 6, Kirigami, Qt 6 QML/Quick development files, `qmake6`, `make`, a C++ compiler, Bash, curl, jq, and GNU coreutils. On CachyOS/Arch with KDE already installed, the build and CLI dependencies can be installed with:
