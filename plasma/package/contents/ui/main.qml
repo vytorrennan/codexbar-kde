@@ -107,7 +107,7 @@ PlasmoidItem {
     }
 
     fullRepresentation: Item {
-        Layout.minimumWidth: 260
+        Layout.minimumWidth: usage.minimumPopupWidth
         Layout.minimumHeight: Math.ceil(usage.implicitHeight)
         Layout.preferredWidth: 320
         Layout.preferredHeight: Math.max(Layout.minimumHeight, usage.implicitHeight)

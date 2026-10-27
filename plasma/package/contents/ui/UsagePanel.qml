@@ -23,8 +23,10 @@ Item {
   function setting(key, fallback) { return settings[key] === undefined ? fallback : settings[key] }
   function close() { closeRequested() }
   function switchPanel(direction) { }
+  readonly property int minimumPopupWidth: 260
+  readonly property int contentPadding: 12
   implicitWidth: 320
-  implicitHeight: column.implicitHeight + 24
+  implicitHeight: column.implicitHeight + contentPadding * 2
 
   property var anchorItem: null
 
@@ -743,38 +745,11 @@ Item {
     onTriggered: root.nowMs = Date.now()
   }
 
-  // Panel-open sweep: every meter fills 0 -> value once per open. Data
-  // refreshes while the panel sits open keep the 160ms width Behaviors and
-  // never re-sweep — only the open path restarts this. The sweep is geometry
-  // only: the ramp it uncovers is fixed to the scale and never animates, so
-  // the colors under a given percentage stay put through the whole sweep.
-  // openProgress constructs at 1 so a never-opened panel renders full meters.
-  property real openProgress: 1
-
-  // Gates the 160ms width Behaviors during the sweep: set BEFORE the jump to
-  // 0 (or the Behavior would smear the reset), cleared in onFinished — not
-  // onStopped, which fires spuriously when restart() interrupts a running
-  // sweep on rapid re-opens.
-  property bool openSweeping: false
-
-  NumberAnimation {
-    id: openSweep
-    target: root
-    property: "openProgress"
-    from: 0
-    to: 1
-    duration: 200
-    easing.type: Easing.OutCubic
-    onFinished: root.openSweeping = false
-  }
-
   onOpenedChanged: if (opened) {
     nowMs = Date.now()
     // A panel that reopens where it was left scrolled shows the middle of
     // itself; every open starts at the top.
     if (panelFlick) panelFlick.contentY = 0
-    openSweeping = true
-    openSweep.restart()
     Qt.callLater(function() {
       if (root.pollingEnabled) root.refresh(false)
       keyCatcher.forceActiveFocus()
@@ -788,7 +763,7 @@ Item {
   Item {
     id: panel
     anchors.fill: parent
-    anchors.margins: 12
+    anchors.margins: root.contentPadding
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -818,7 +793,10 @@ Item {
 
         Column {
           id: column
-          width: panelFlick.width
+          // Before the popup is created this hidden panel lives inside the
+          // compact icon. Measure at a valid popup width, so loading text
+          // cannot inflate the minimum height and overwrite Plasma's saved size.
+          width: Math.max(root.minimumPopupWidth - root.contentPadding * 2, panelFlick.width)
           spacing: Compat.Style.space(8)
 
           // ---------- Hero: glyph · Codex · plan ----------
@@ -1081,6 +1059,7 @@ Item {
   // reset countdown.
   component WindowRow: Column {
     id: windowRow
+    objectName: win ? "usageWindow-" + win.id : "usageWindow"
     property var win: null
 
     readonly property real usedPct: {
@@ -1089,10 +1068,8 @@ Item {
     }
     readonly property bool hasElapsed: !!win && !!win.reset_at
     readonly property real elapsed: hasElapsed ? root.clamp(Number(win.elapsed_pct) / 100, 0, 1) : 0
-    // The percent readout takes the ramp's color at the value currently
-    // PAINTED, the same one the fill's tip lands on — so the figure and its
-    // bar tip hold the same color all the way through the count-up.
-    readonly property color valueColor: root.panelUsageColor(meterFill.shownPct)
+    // Labels always describe the report, independent of rendering or animation.
+    readonly property color valueColor: root.panelUsageColor(usedPct)
 
     // The meter's ramp is fixed to the TRACK's scale, but a Gradient spans the
     // FILL, not the track. Each scale anchor is therefore repositioned to
@@ -1103,7 +1080,7 @@ Item {
     // shownPct is the fill's ACTUAL painted percentage (read off its animated
     // width), never the target: stops built from the target would paint a
     // compressed copy of the ramp into a narrower fill and stretch it as the
-    // fill grows, sliding every color through both the open sweep and the
+    // fill grows, sliding every color through the
     // 160ms refresh animation. At zero width the fill paints nothing, so the
     // guard's return value is never actually seen.
     function rampStop(anchorPct, shownPct) {
@@ -1135,14 +1112,11 @@ Item {
 
       Text {
         id: windowValue
+        objectName: "usagePercentage"
         textFormat: Text.PlainText
-        // Counts up with its own meter. The figure and the fill's geometry
-        // read ONE animated quantity — the fill's painted width — so they
-        // cannot drift apart: not during the 200ms open sweep, and not during
-        // the 160ms refresh transition, where the figure counts across to the
-        // new value instead of jumping. Same rounding as the final figure, so
-        // the last frame lands exactly on the real value.
-        text: windowRow.win ? Math.round(meterFill.shownPct) + "%" : "—"
+        // Cached values must be visible immediately, even before the popup
+        // has a rendered frame or the meter has its final geometry.
+        text: windowRow.win ? Math.round(windowRow.usedPct) + "%" : "—"
         color: windowRow.valueColor
         font.family: root.fontFamily
         font.pixelSize: Compat.Style.font.body
@@ -1177,14 +1151,12 @@ Item {
         anchors.verticalCenter: meterTrack.verticalCenter
         height: meterTrack.height
         radius: meterTrack.radius
-        width: meterTrack.width * (windowRow.usedPct / 100) * root.openProgress
+        width: meterTrack.width * (windowRow.usedPct / 100)
 
         // The percentage the fill is CURRENTLY painting, read back off its own
-        // animated width. Deriving the stops from this — rather than from the
-        // target value — is what keeps the ramp pinned through both
-        // animations: the open sweep (driven by openProgress) and the 160ms
-        // width Behavior on a data refresh, where the target jumps but the
-        // width is still interpolating.
+        // animated width. Using that width instead of the target value
+        // keeps the ramp pinned during the 160ms width
+        // animation when new usage data arrives.
         readonly property real shownPct: meterTrack.width > 0
           ? width / meterTrack.width * 100 : 0
 
@@ -1221,7 +1193,7 @@ Item {
         }
 
         Behavior on width {
-          enabled: !root.openSweeping
+          enabled: root.opened && root.visible
           NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
         }
       }
@@ -1240,14 +1212,12 @@ Item {
         // never be mistaken for the fill's tip.
         anchors.bottom: meterTrack.top
         anchors.bottomMargin: Math.max(1, Compat.Style.spaceReal(1))
-        // Travels with the fill and the figure: all three are scaled by the
-        // same openProgress, so the sweep moves them as one.
-        x: root.clamp(meterTrack.width * windowRow.elapsed * root.openProgress - width / 2,
+        x: root.clamp(meterTrack.width * windowRow.elapsed - width / 2,
                       0, Math.max(0, meterTrack.width - width))
         color: root.alpha(root.foreground, 0.75)
 
         Behavior on x {
-          enabled: !root.openSweeping
+          enabled: root.opened && root.visible
           NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
         }
       }
